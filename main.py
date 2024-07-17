@@ -1,4 +1,4 @@
-from flask import Flask, request, render_template
+from flask import Flask, request, render_template, redirect, url_for
 from flask_bootstrap import Bootstrap5
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import ForeignKey, String, Integer, Float, Table, Boolean
@@ -41,10 +41,10 @@ class CafeForm(FlaskForm):
     location_url = URLField('Location Google Maps Link', validators=[DataRequired()])
     img_url = URLField('Image URL', validators=[DataRequired()])
     location = StringField("Location", validators=[DataRequired()])
-    has_sockets = BooleanField(label="Has Sockets", validators=[DataRequired()])
-    has_toilet = BooleanField(label="Has Toilet", validators=[DataRequired()])
-    has_wifi = BooleanField(label="Has Wi-Fi", validators=[DataRequired()])
-    can_take_calls = BooleanField(label="Can take Calls", validators=[DataRequired()])
+    has_sockets = BooleanField(label="Has Sockets")
+    has_toilet = BooleanField(label="Has Toilet")
+    has_wifi = BooleanField(label="Has Wi-Fi")
+    can_take_calls = BooleanField(label="Can take Calls")
     num_seats = IntegerField(label="Amount of Seats", validators=[DataRequired()])
     coffee_price = StringField(label="Coffe Price", validators=[DataRequired()])
     submit = SubmitField("Add a new Cafe")
@@ -52,32 +52,49 @@ class CafeForm(FlaskForm):
 
 @app.route("/")
 def home_page():
-    cafe_id = 1
-    access = db.get_or_404(Cafe, cafe_id)
-
-    return render_template("index.html", access=access.name)
+    all_cafes = db.session.execute(db.select(Cafe).order_by(Cafe.id)).scalars().all()
+    return render_template("index.html", all_data=all_cafes)
 
 
 @app.route('/add', methods=["POST", "GET"])
 def add_cafe():
     form = CafeForm()
     if form.validate_on_submit():
+        if form.has_wifi.data:
+            has_wifi = 1
+        else:
+            has_wifi = 0
+
+        if form.has_sockets.data:
+            has_sockets = 1
+        else:
+            has_sockets = 0
+
+        if form.has_toilet.data:
+            has_toilet = 1
+        else:
+            has_toilet = 0
+
+        if form.can_take_calls.data:
+            can_take_calls = 1
+        else:
+            can_take_calls = 0
         new_cafe = Cafe(
             name=form.cafe.data,
             map_url=form.location_url.data,
             img_url=form.img_url.data,
             location=form.location.data,
             seats=form.num_seats.data,
-            has_toilet=form.has_toilet.data,
-            has_wifi=form.has_wifi.data,
-            has_sockets=form.has_sockets,
-            can_take_calls=form.can_take_calls,
-            coffee_price=form.coffee_price
+            has_toilet=has_toilet,
+            has_wifi=has_wifi,
+            has_sockets=has_sockets,
+            can_take_calls=can_take_calls,
+            coffee_price=form.coffee_price.data
 
         )
         db.session.add(new_cafe)
         db.session.commit()
-        return render_template("success.html")
+        return redirect(url_for('home_page'))
     return render_template('add.html', form=form)
 
 

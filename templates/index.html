@@ -1,4 +1,51 @@
 {% extends "base.html" %}
 {% block content %}
-<h1>{{access}}</h1>
+<div class="container">
+<ul>
+{% for cafe in all_data %}
+    <li class="cafe_data">
+<h1>{{ cafe.name }}</h1>
+<img src="{{ cafe.img_url }}" width="200" height="200">
+        <h2> Location: {{ cafe.location }}</h2>
+
+        {% if cafe.has_sockets == 1 %}
+        <h3>Has Sockets: Yes</h3>
+        {% else %}
+       <h3>Has Sockets: No</h3>
+        {% endif %}
+
+
+
+        {% if cafe.has_toilet == 1 %}
+        <h3>Has Toilet: Yes</h3>
+        {% else %}
+       <h3>Has Toilet: No</h3>
+        {% endif %}
+
+
+
+        {% if cafe.has_wifi == 1 %}
+        <h3>Has WiFi: Yes</h3>
+        {% else %}
+       <h3>Has WiFi: No</h3>
+        {% endif %}
+
+
+
+        {% if cafe.can_take_calls == 1 %}
+        <h3>Can Take Calls: Yes</h3>
+        {% else %}
+       <h3>Can Take Calls: No</h3>
+        {% endif %}
+
+
+
+
+        <h2>Seats: {{cafe.seats}}</h2>
+         <h1>Coffee Price:${{cafe.coffee_price}}</h1>
+</li>
+{% endfor %}
+
+</ul>
+</div>
 {% endblock %}
